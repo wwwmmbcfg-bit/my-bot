@@ -1,48 +1,46 @@
 import os
 import yt_dlp
+import asyncio
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
+from flask import Flask
+from threading import Thread
 
-# إعدادات التحميل
-def download_video(url):
-    ydl_opts = {
-        'format': 'best',
-        'outtmpl': 'downloaded_video.%(ext)s',
-        'max_filesize': 50 * 1024 * 1024,
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        return ydl.prepare_filename(info)
+# سيرفر وهمي لإبقاء الخدمة تعمل
+app_web = Flask('')
+@app_web.route('/')
+def home(): return "Bot is Online!"
+def run_web(): app_web.run(host='0.0.0.0', port=7860)
 
-# وظيفة الرد على الرسائل
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
-    if not url.startswith("http"):
-        await update.message.reply_text("من فضلك أرسل رابط فيديو صحيح 🔗")
-        return
-
-    msg = await update.message.reply_text("جاري التحميل والمعالجة... ⏳")
-
+    if not url.startswith("http"): return
+    msg = await update.message.reply_text("⏳ جاري التحميل... انتظر قليلاً")
     try:
-        file_path = download_video(url)
-        with open(file_path, 'rb') as video:
-            await update.message.reply_video(video=video, caption="تم التحميل بنجاح ✅")
+        # إعدادات التحميل
+        ydl_opts = {'format': 'best', 'outtmpl': 'video.mp4'}
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
         
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        with open('video.mp4', 'rb') as v:
+            await update.message.reply_video(video=v, caption="✅ تم التحميل")
+        
+        os.remove('video.mp4')
         await msg.delete()
-
     except Exception as e:
-        await msg.edit_text(f"عذراً، حدث خطأ: {str(e)}")
+        await msg.edit_text(f"❌ حدث خطأ: {str(e)}")
 
-# تشغيل البوت
 if __name__ == '__main__':
-    # استبدل النص أدناه بالتوكن الحقيقي من BotFather
-    TOKEN = "8200389717:AAGTh9os6c0QouFzvPnt0B6lGTlcNVNPNfI"
+    # تشغيل السيرفر الوهمي
+    Thread(target=run_web).start()
     
-    print("البوت يعمل الآن...")
-    app = Application.builder().token(TOKEN).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
-
-
+    # التوكن الجديد الخاص بك
+    TOKEN = "8351715808:AAHYmi3NxfLYKI6m5kAdh_gO9eWu-tOQ5mQ"
+    
+    # إعداد البوت مع زيادة مهلة الاتصال (Timeout) لحل مشكلة NetworkError
+    application = Application.builder().token(TOKEN).connect_timeout(30).read_timeout(30).build()
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    
+    print("البوت يحاول الاتصال الآن... ✅")
+    application.run_polling(drop_pending_updates=True)
+    

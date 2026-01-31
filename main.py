@@ -4,7 +4,7 @@ import asyncio
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 
-# --- دالة التحميل للمواقع المدعومة ---
+# دالة التحميل الأساسية
 def download_media(url):
     ydl_opts = {
         'format': 'best',
@@ -21,29 +21,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text
     if "http" not in url: return
 
-    # --- فحص إذا كان الرابط من يوتيوب ---
+    # رسالة اعتذار لليوتيوب فقط بسبب حظر السيرفرات
     if "youtube.com" in url or "youtu.be" in url:
-        await update.message.reply_text(
-            "⚠️ نعتذر منك.. التحميل من يوتيوب متوقف حالياً للصيانة.\n\n"
-            "✅ يمكنك التحميل من: تيك توك، إنستغرام، فيسبوك، وتويتر."
-        )
+        await update.message.reply_text("⚠️ نعتذر، التحميل من يوتيوب متوقف حالياً. جرب تيك توك أو إنستغرام.")
         return
 
-    status_msg = await update.message.reply_text("⏳ جاري التحميل من العراق... يرجى الانتظار")
     try:
+        # التحميل المباشر
         path = download_media(url)
         with open(path, 'rb') as video:
-            await update.message.reply_video(video=video, caption="✅ تم التحميل بواسطة بوتك")
+            # هنا يمكنك تغيير نص الرد النهائي
+            await update.message.reply_video(video=video, caption="🎬 مشاهدة ممتعة)
         os.remove(path)
-        await status_msg.delete()
     except Exception as e:
-        await status_msg.edit_text(f"❌ عذراً، هذا الرابط غير مدعوم حالياً أو أنه فيديو خاص.")
+        await update.message.reply_text("❌ حدث خطأ في الرابط أو أن الفيديو غير متاح.")
 
 if __name__ == '__main__':
-    # تأكد من وضع التوكن الخاص بك هنا
+    # تأكد من وضع التوكن الخاص بك هنا بدقة
     TOKEN = "8351715808:AAHYmi3NxfLYKI6m5kAdh_gO9eWu-tOQ5mQ" 
     
-    print("البوت يعمل الآن باحترافية... 🚀")
+    print("البوت يعمل الآن على Railway... 🚀")
     app = Application.builder().token(TOKEN).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.run_polling(drop_pending_updates=True)

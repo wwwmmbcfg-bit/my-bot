@@ -27,12 +27,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # 1. إرسال رسالة "يرجى الانتظار" فور استلام الرابط
-    status_msg = await update.message.reply_text("⏳ استلمت الرابط، يرجى الانتظار قليلاً جاري التحميل...")
+    status_msg = await update.message.reply_text("🚶 استلمت الرابط، يرجى الانتظار قليلاً جاري التحميل...")
 
     try:
         path = download_media(url)
         with open(path, 'rb') as video:
-            # 2. إرسال الفيديو مع كابشن "مشاهدة ممتعة 🫀"
+            # 2. إرسال الفيديو مع كابشن "مشاهدة ممتعة 🤷"
             await update.message.reply_video(video=video, caption="مشاهدة ممتعة 🌚")
         
         os.remove(path)

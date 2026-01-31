@@ -31,7 +31,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         path = download_media(url)
         with open(path, 'rb') as video:
             # هنا يمكنك تغيير نص الرد النهائي
-            await update.message.reply_video(video=video, caption="🎬 مشاهدة ممتعة)
+            await update.message.reply_video(video=video, caption="🎬 مشاهدة ممتعة")
         os.remove(path)
     except Exception as e:
         await update.message.reply_text("❌ حدث خطأ في الرابط أو أن الفيديو غير متاح.")

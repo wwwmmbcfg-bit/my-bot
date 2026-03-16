@@ -44,7 +44,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     # ضع التوكن الخاص بك هنا
-    TOKEN = "8351715808:AAHJLiiKypC4b8jWEs2QwQ6VDqtOJEfmaKk" 
+    TOKEN = "8351715808:AAFJV48A1XVCbEyIP0st_0M1bLcaq-jw2bc" 
     
     print("البوت يعمل الآن بنظام الرد الذكي... 🚀")
     
